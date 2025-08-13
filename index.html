@@ -4,87 +4,73 @@
 <meta charset="UTF-8">
 <title>Tic Tac Toe</title>
 <style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    color: white;
-    user-select: none;
-    transition: background 1s ease; /* smooth fade */
-    background: white; /* default */
-  }
-  h1 { margin: 20px 0; color: black; }
-  #board {
-    display: grid;
-    grid-template-columns: repeat(3, 100px);
-    gap: 5px;
-    justify-content: center;
-    margin-top: 20px;
-  }
-  .cell {
-    width: 100px; height: 100px;
-    font-size: 40px; font-weight: bold;
-    display: flex; justify-content: center; align-items: center;
-    background: #ccc; /* light grey instead of white */
-    cursor: pointer;
-  }
-  .cell.X { color: blue; }
-  .cell.O { color: red; }
-  #status { font-size: 20px; margin: 15px 0; color: black; }
-
-  /* Restart button */
-  #restart {
-    background: #1f8b1f; /* dark lime */
-    color: white; padding: 10px 20px;
-    border: none; font-size: 16px; font-weight: bold;
-    border-radius: 8px; cursor: pointer;
-    margin-top: 25px; /* move down */
-    transition: all 0.2s;
-  }
-  #restart:hover { filter: brightness(1.2); }
-
-  /* Difficulty buttons container */
-  #difficulty {
-    margin-top: 20px;
-  }
-  #difficulty button {
-    background: white;
-    color: black;
-    padding: 8px 15px;
-    margin: 5px;
-    border: none;
-    font-size: 14px;
-    font-weight: bold;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s;
-  }
-
-  /* Hover & Active colors with glow */
-  #difficulty button.friend:hover, #difficulty button.friend.active {
-    background: gray; color: white; box-shadow: 0 0 5px gray;
-  }
-  #difficulty button.simple:hover, #difficulty button.simple.active {
-    background: #3498db; color: white; box-shadow: 0 0 5px #3498db;
-  }
-  #difficulty button.easy:hover, #difficulty button.easy.active {
-    background: #2ecc71; color: white; box-shadow: 0 0 5px #2ecc71;
-  }
-  #difficulty button.medium:hover, #difficulty button.medium.active {
-    background: #e67e22; color: white; box-shadow: 0 0 5px #e67e22;
-  }
-  #difficulty button.hard:hover, #difficulty button.hard.active {
-    background: #e74c3c; color: white; box-shadow: 0 0 15px #e74c3c;
-  }
-  #difficulty button.impossible:hover, #difficulty button.impossible.active {
-    background: #4B0082; color: white; box-shadow: 0 0 15px #4B0082;
-  }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  color: white;
+  user-select: none;
+  transition: background 1s ease;
+  background: white;
+}
+h1 { margin: 20px 0; color: black; }
+#board {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  gap: 5px;
+  justify-content: center;
+  margin-top: 20px;
+}
+.cell {
+  width: 100px; height: 100px;
+  font-size: 40px; font-weight: bold;
+  display: flex; justify-content: center; align-items: center;
+  background: #ccc;
+  cursor: pointer;
+}
+.cell.X { color: blue; }
+.cell.O { color: red; }
+#status { font-size: 20px; margin: 15px 0; color: black; }
+#restart {
+  background: #1f8b1f;
+  color: white; padding: 10px 20px;
+  border: none; font-size: 16px; font-weight: bold;
+  border-radius: 8px; cursor: pointer;
+  margin-top: 30px;
+  transition: all 0.2s;
+}
+#restart:hover { filter: brightness(1.2); }
+#difficulty { margin-top: 20px; }
+#difficulty button {
+  background: white; color: black;
+  padding: 8px 15px; margin: 5px;
+  border: none; font-size: 14px; font-weight: bold;
+  border-radius: 6px; cursor: pointer;
+  transition: all 0.3s;
+}
+#difficulty button.friend:hover, #difficulty button.friend.active {
+  background: gray; color: white; box-shadow: 0 0 5px gray;
+}
+#difficulty button.simple:hover, #difficulty button.simple.active {
+  background: #3498db; color: white; box-shadow: 0 0 5px #3498db;
+}
+#difficulty button.easy:hover, #difficulty button.easy.active {
+  background: #2ecc71; color: white; box-shadow: 0 0 5px #2ecc71;
+}
+#difficulty button.medium:hover, #difficulty button.medium.active {
+  background: #e67e22; color: white; box-shadow: 0 0 5px #e67e22;
+}
+#difficulty button.hard:hover, #difficulty button.hard.active {
+  background: #e74c3c; color: white; box-shadow: 0 0 15px #e74c3c;
+}
+#difficulty button.impossible:hover, #difficulty button.impossible.active {
+  background: #4B0082; color: white; box-shadow: 0 0 15px #4B0082;
+}
 </style>
 </head>
 <body>
 <h1>Tic Tac Toe</h1>
 
-<!-- Difficulty buttons -->
 <div id="difficulty">
   <button class="friend">Friend</button>
   <button class="simple">Simple</button>
@@ -105,106 +91,201 @@ const restartBtn = document.getElementById("restart");
 const diffBtns = document.querySelectorAll("#difficulty button");
 
 let cells = Array(9).fill("");
-let playerTurn = true;
+let playerTurn = true; // true=X, false=O
 let difficulty = "friend";
 
-// Difficulty button behavior (doesn't change body color)
-diffBtns.forEach(btn => {
-  btn.addEventListener("click", () => {
-    diffBtns.forEach(b => b.classList.remove("active"));
+// Difficulty button behavior
+diffBtns.forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    diffBtns.forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
-    difficulty = btn.classList[0]; // friend, simple, etc.
-    restartGame(false); // false = don't change color
+    difficulty=btn.classList[0];
+    restartGame(false);
   });
 });
 
 // Create board
-for (let i = 0; i < 9; i++) {
-  const cell = document.createElement("div");
+for(let i=0;i<9;i++){
+  const cell=document.createElement("div");
   cell.classList.add("cell");
-  cell.addEventListener("click", () => playerMove(i));
+  cell.addEventListener("click",()=>playerMove(i));
   boardEl.appendChild(cell);
 }
 
-restartBtn.addEventListener("click", () => restartGame(true));
+restartBtn.addEventListener("click",()=>restartGame(true));
 
-function changeBackground() {
-  const r = Math.floor(Math.random() * 256);
-  const g = Math.floor(Math.random() * 256);
-  const b = Math.floor(Math.random() * 256);
-  document.body.style.background = `rgb(${r},${g},${b})`;
+function changeBackground(){
+  const r=Math.floor(Math.random()*256);
+  const g=Math.floor(Math.random()*256);
+  const b=Math.floor(Math.random()*256);
+  document.body.style.background=`rgb(${r},${g},${b})`;
 }
 
-function playerMove(index) {
-  if (cells[index] !== "" || checkEnd()) return;
+function playerMove(index){
+  if(cells[index]!="" || checkEnd()) return;
 
-  if (playerTurn) { // X's turn
-    makeMove(index, "X");
+  if(playerTurn){ // X turn
+    makeMove(index,"X");
     changeBackground();
-    if (checkEnd()) return;
-
-    if (difficulty === "friend") {
-      playerTurn = false; // Now O plays manually
-    } else {
-      playerTurn = false;
-      setTimeout(aiMove, 1500);
-    }
-
-  } else { // O's turn (human only in friend mode)
-    if (difficulty === "friend") {
-      makeMove(index, "O");
+    if(checkEnd()) return;
+    if(difficulty==="friend") playerTurn=false;
+    else { playerTurn=false; setTimeout(aiMove,1500); }
+  } else { // O turn
+    if(difficulty==="friend"){
+      makeMove(index,"O");
       changeBackground();
-      if (checkEnd()) return;
-      playerTurn = true;
+      if(checkEnd()) return;
+      playerTurn=true;
     }
   }
 }
 
-function aiMove() {
-  let empty = cells.map((v,i)=>v===""?i:null).filter(v=>v!==null);
-  let move = empty[Math.floor(Math.random() * empty.length)];
-  makeMove(move, "O");
+function aiMove(){
+  let move;
+  if(difficulty==="simple") move=randomMove();
+  else if(difficulty==="easy") move=easyMove();
+  else if(difficulty==="medium") move=mediumMove();
+  else if(difficulty==="hard") move=hardMove();
+  else if(difficulty==="impossible") move=findBestMove(cells,"O");
+
+  makeMove(move,"O");
   changeBackground();
-  playerTurn = true;
+  playerTurn=true;
   checkEnd();
 }
 
-function makeMove(index, player) {
-  cells[index] = player;
-  boardEl.children[index].textContent = player;
+function randomMove(){
+  let empty=cells.map((v,i)=>v===""?i:null).filter(v=>v!==null);
+  return empty[Math.floor(Math.random()*empty.length)];
+}
+
+function easyMove(){
+  let winBlock=findWinningMove("O") ?? findWinningMove("X");
+  return winBlock ?? randomMove();
+}
+
+function mediumMove(){
+  let win=findWinningMove("O");
+  if(win!==null) return win;
+  let block=findWinningMove("X");
+  if(block!==null) return block;
+  return randomMove();
+}
+
+function hardMove(){
+  return findBestMoveDepth(cells,"O",3); // depth-limited Minimax
+}
+
+function makeMove(index,player){
+  cells[index]=player;
+  boardEl.children[index].textContent=player;
   boardEl.children[index].classList.add(player);
 }
 
-function checkEnd() {
-  if (checkWinner("X")) { statusEl.textContent = "X Wins!"; return true; }
-  if (checkWinner("O")) { statusEl.textContent = "O Wins!"; return true; }
-  if (!cells.includes("")) { statusEl.textContent = "Draw!"; return true; }
+function checkEnd(){
+  if(checkWinner("X")){ statusEl.textContent="X Wins!"; return true; }
+  if(checkWinner("O")){ statusEl.textContent="O Wins!"; return true; }
+  if(!cells.includes("")){ statusEl.textContent="Draw!"; return true; }
   return false;
 }
 
-function checkWinner(player) {
-  const wins = [
-    [0,1,2],[3,4,5],[6,7,8],
-    [0,3,6],[1,4,7],[2,5,8],
-    [0,4,8],[2,4,6]
-  ];
-  return wins.some(line => line.every(i => cells[i] === player));
+function checkWinner(player){
+  const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  return wins.some(line=>line.every(i=>cells[i]===player));
 }
 
-function restartGame(changeColor = true) {
+function restartGame(changeColor=true){
   cells.fill("");
-  for (let i=0;i<9;i++) {
-    boardEl.children[i].textContent = "";
-    boardEl.children[i].className = "cell";
+  for(let i=0;i<9;i++){
+    boardEl.children[i].textContent="";
+    boardEl.children[i].className="cell";
   }
-  statusEl.textContent = "";
-  playerTurn = true;
-  if (changeColor) {
-    document.body.style.background = "white";
+  statusEl.textContent="";
+  playerTurn=true;
+  if(changeColor) document.body.style.background="white";
+}
+
+// --- Helper for blocking/winning ---
+function findWinningMove(player){
+  const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  for(let line of wins){
+    let vals=line.map(i=>cells[i]);
+    if(vals.filter(v=>v===player).length===2 && vals.includes("")){
+      return line[vals.indexOf("")];
+    }
+  }
+  return null;
+}
+
+// --- Minimax for impossible ---
+function findBestMove(board,player){
+  let bestScore=-Infinity;
+  let bestMove;
+  for(let i=0;i<9;i++){
+    if(board[i]===""){
+      board[i]=player;
+      let score=minimax(board,false);
+      board[i]="";
+      if(score>bestScore){ bestScore=score; bestMove=i; }
+    }
+  }
+  return bestMove;
+}
+
+function minimax(board,isMax){
+  if(checkWinner("O")) return 10;
+  if(checkWinner("X")) return -10;
+  if(!board.includes("")) return 0;
+  if(isMax){
+    let best=-Infinity;
+    for(let i=0;i<9;i++){
+      if(board[i]===""){ board[i]="O"; best=Math.max(best,minimax(board,false)); board[i]=""; }
+    }
+    return best;
+  } else{
+    let best=Infinity;
+    for(let i=0;i<9;i++){
+      if(board[i]===""){ board[i]="X"; best=Math.min(best,minimax(board,true)); board[i]=""; }
+    }
+    return best;
   }
 }
 
-// Default active mode = Friend
+// --- Depth-limited Minimax for hard ---
+function findBestMoveDepth(board,player,depth){
+  let bestScore=-Infinity;
+  let bestMove;
+  for(let i=0;i<9;i++){
+    if(board[i]===""){
+      board[i]=player;
+      let score=minimaxDepth(board,false,depth-1);
+      board[i]="";
+      if(score>bestScore){ bestScore=score; bestMove=i; }
+    }
+  }
+  return bestMove;
+}
+
+function minimaxDepth(board,isMax,depth){
+  if(checkWinner("O")) return 10;
+  if(checkWinner("X")) return -10;
+  if(!board.includes("") || depth===0) return 0;
+  if(isMax){
+    let best=-Infinity;
+    for(let i=0;i<9;i++){
+      if(board[i]===""){ board[i]="O"; best=Math.max(best,minimaxDepth(board,false,depth-1)); board[i]=""; }
+    }
+    return best;
+  } else{
+    let best=Infinity;
+    for(let i=0;i<9;i++){
+      if(board[i]===""){ board[i]="X"; best=Math.min(best,minimaxDepth(board,true,depth-1)); board[i]=""; }
+    }
+    return best;
+  }
+}
+
+// Default active mode
 document.querySelector("#difficulty .friend").classList.add("active");
 </script>
 </body>
