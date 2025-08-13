@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tic Tac Toe</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    color: white;
+    user-select: none;
+    transition: background 1s ease; /* smooth fade */
+    background: white; /* default */
+  }
+  h1 { margin: 20px 0; color: black; }
+  #board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    gap: 5px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  .cell {
+    width: 100px; height: 100px;
+    font-size: 40px; font-weight: bold;
+    display: flex; justify-content: center; align-items: center;
+    background: #ccc; /* light grey instead of white */
+    cursor: pointer;
+  }
+  .cell.X { color: blue; }
+  .cell.O { color: red; }
+  #status { font-size: 20px; margin: 15px 0; color: black; }
+
+  /* Restart button */
+  #restart {
+    background: #1f8b1f; /* dark lime */
+    color: white; padding: 10px 20px;
+    border: none; font-size: 16px; font-weight: bold;
+    border-radius: 8px; cursor: pointer;
+    margin-top: 25px; /* move down */
+    transition: all 0.2s;
+  }
+  #restart:hover { filter: brightness(1.2); }
+
+  /* Difficulty buttons container */
+  #difficulty {
+    margin-top: 20px;
+  }
+  #difficulty button {
+    background: white;
+    color: black;
+    padding: 8px 15px;
+    margin: 5px;
+    border: none;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  /* Hover & Active colors with glow */
+  #difficulty button.friend:hover, #difficulty button.friend.active {
+    background: gray; color: white; box-shadow: 0 0 5px gray;
+  }
+  #difficulty button.simple:hover, #difficulty button.simple.active {
+    background: #3498db; color: white; box-shadow: 0 0 5px #3498db;
+  }
+  #difficulty button.easy:hover, #difficulty button.easy.active {
+    background: #2ecc71; color: white; box-shadow: 0 0 5px #2ecc71;
+  }
+  #difficulty button.medium:hover, #difficulty button.medium.active {
+    background: #e67e22; color: white; box-shadow: 0 0 5px #e67e22;
+  }
+  #difficulty button.hard:hover, #difficulty button.hard.active {
+    background: #e74c3c; color: white; box-shadow: 0 0 15px #e74c3c;
+  }
+  #difficulty button.impossible:hover, #difficulty button.impossible.active {
+    background: #4B0082; color: white; box-shadow: 0 0 15px #4B0082;
+  }
+</style>
+</head>
+<body>
+<h1>Tic Tac Toe</h1>
+
+<!-- Difficulty buttons -->
+<div id="difficulty">
+  <button class="friend">Friend</button>
+  <button class="simple">Simple</button>
+  <button class="easy">Easy</button>
+  <button class="medium">Medium</button>
+  <button class="hard">Hard</button>
+  <button class="impossible">Impossible</button>
+</div>
+
+<div id="status"></div>
+<div id="board"></div>
+<button id="restart">Restart</button>
+
+<script>
+const boardEl = document.getElementById("board");
+const statusEl = document.getElementById("status");
+const restartBtn = document.getElementById("restart");
+const diffBtns = document.querySelectorAll("#difficulty button");
+
+let cells = Array(9).fill("");
+let playerTurn = true;
+let difficulty = "friend";
+
+// Difficulty button behavior (doesn't change body color)
+diffBtns.forEach(btn => {
+  btn.addEventListener("click", () => {
+    diffBtns.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    difficulty = btn.classList[0]; // friend, simple, etc.
+    restartGame(false); // false = don't change color
+  });
+});
+
+// Create board
+for (let i = 0; i < 9; i++) {
+  const cell = document.createElement("div");
+  cell.classList.add("cell");
+  cell.addEventListener("click", () => playerMove(i));
+  boardEl.appendChild(cell);
+}
+
+restartBtn.addEventListener("click", () => restartGame(true));
+
+function changeBackground() {
+  const r = Math.floor(Math.random() * 256);
+  const g = Math.floor(Math.random() * 256);
+  const b = Math.floor(Math.random() * 256);
+  document.body.style.background = `rgb(${r},${g},${b})`;
+}
+
+function playerMove(index) {
+  if (cells[index] !== "" || checkEnd()) return;
+
+  if (playerTurn) { // X's turn
+    makeMove(index, "X");
+    changeBackground();
+    if (checkEnd()) return;
+
+    if (difficulty === "friend") {
+      playerTurn = false; // Now O plays manually
+    } else {
+      playerTurn = false;
+      setTimeout(aiMove, 1500);
+    }
+
+  } else { // O's turn (human only in friend mode)
+    if (difficulty === "friend") {
+      makeMove(index, "O");
+      changeBackground();
+      if (checkEnd()) return;
+      playerTurn = true;
+    }
+  }
+}
+
+function aiMove() {
+  let empty = cells.map((v,i)=>v===""?i:null).filter(v=>v!==null);
+  let move = empty[Math.floor(Math.random() * empty.length)];
+  makeMove(move, "O");
+  changeBackground();
+  playerTurn = true;
+  checkEnd();
+}
+
+function makeMove(index, player) {
+  cells[index] = player;
+  boardEl.children[index].textContent = player;
+  boardEl.children[index].classList.add(player);
+}
+
+function checkEnd() {
+  if (checkWinner("X")) { statusEl.textContent = "X Wins!"; return true; }
+  if (checkWinner("O")) { statusEl.textContent = "O Wins!"; return true; }
+  if (!cells.includes("")) { statusEl.textContent = "Draw!"; return true; }
+  return false;
+}
+
+function checkWinner(player) {
+  const wins = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+  return wins.some(line => line.every(i => cells[i] === player));
+}
+
+function restartGame(changeColor = true) {
+  cells.fill("");
+  for (let i=0;i<9;i++) {
+    boardEl.children[i].textContent = "";
+    boardEl.children[i].className = "cell";
+  }
+  statusEl.textContent = "";
+  playerTurn = true;
+  if (changeColor) {
+    document.body.style.background = "white";
+  }
+}
+
+// Default active mode = Friend
+document.querySelector("#difficulty .friend").classList.add("active");
+</script>
+</body>
+</html>
